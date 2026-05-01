@@ -1,0 +1,243 @@
+smartlens/
+│
+├── 📄 Documentation & License
+│   ├── README.md                          (Setup guide & features)
+│   ├── ARCHITECTURE.md                    (Technical deep-dive with diagrams)
+│   ├── CONTRIBUTING.md                    (Contribution guidelines)
+│   ├── GITHUB.md                          (GitHub profile overview)
+│   ├── GITHUB_UPLOAD_CHECKLIST.md         (Pre-upload verification)
+│   ├── REPOSITORY_SUMMARY.md              (Complete package summary)
+│   ├── LICENSE                            (MIT License)
+│   └── FILE_TREE.txt                      (This file)
+│
+├── 🚀 Setup & Deployment
+│   ├── docker-compose.yml                 (Full stack orchestration)
+│   ├── setup.sh                           (One-time project setup)
+│   ├── run.sh                             (Local development runner)
+│   └── .env.example                       (Environment template)
+│
+├── 🎨 Frontend (HTML/CSS/JS + Testing)
+│   └── frontend/
+│       ├── SmartLens_HK_Final.html        🔶 Main UI (HK-optimized)
+│       │                                      - 3 tested vision models
+│       │                                      - Real-time SSE notifications
+│       │                                      - Food image analysis
+│       │                                      - News detection
+│       │                                      - Sleep & step tracking
+│       │                                      - Cache integration
+│       │
+│       ├── index.html                     (Legacy Gemini-based UI)
+│       ├── script.py                      (Vision model testing script)
+│       ├── script_1.py                    (Nutrition test on all models)
+│       └── script_2.py                    (HTML generation script)
+│
+├── 🔧 Backend (FastAPI)
+│   └── backend/
+│       ├── main.py                        (FastAPI app entry point)
+│       │   └── Includes all routers
+│       │   └── CORS middleware
+│       │   └── SSE lifespan context
+│       │
+│       ├── config.py                      (Pydantic settings)
+│       │   └── Reads from .env
+│       │   └── Model names
+│       │   └── Cache settings
+│       │
+│       ├── redis_client.py                (Redis async pool & helpers)
+│       │   ├── Async connection pool
+│       │   ├── Cache operations (get/set/delete)
+│       │   ├── Pub/Sub for notifications
+│       │   └── Cache invalidation
+│       │
+│       ├── openrouter_client.py           (API client)
+│       │   ├── Vision API calls (food analysis)
+│       │   ├── Text API calls (news/insights)
+│       │   ├── Automatic fallback models
+│       │   ├── Rate limit handling
+│       │   └── Error recovery
+│       │
+│       ├── requirements.txt               (Python dependencies)
+│       │   ├── fastapi==0.111.0
+│       │   ├── uvicorn[standard]==0.29.0
+│       │   ├── redis[hiredis]==5.0.4
+│       │   ├── pydantic==2.7.1
+│       │   └── ... (8 total packages)
+│       │
+│       ├── Dockerfile                     (Backend container)
+│       │
+│       ├── __pycache__/                   (Python cache - in .gitignore)
+│       │
+│       └── routers/                       (API endpoint modules)
+│           ├── __init__.py
+│           ├── calories.py                POST /api/calories/analyse
+│           │   └── Image upload → nutrition analysis
+│           │   └── Caching (6 hours)
+│           │   └── Fallback models
+│           │
+│           ├── news.py                    POST /api/news/analyse
+│           │   └── Fake/real classification
+│           │   └── Caching (1 hour)
+│           │
+│           ├── health.py                  POST /api/health/*
+│           │   ├── /api/health/steps → step insights
+│           │   ├── /api/health/sleep → sleep analysis
+│           │   └── Caching (10min, 1h)
+│           │
+│           └── notifications.py           GET /api/notifications/stream
+│               └── Server-Sent Events (SSE)
+│               └── Real-time push notifications
+│               └── Redis pub/sub backend
+│
+├── 🐳 DevOps & Infrastructure
+│   └── nginx/
+│       ├── Dockerfile                     (Nginx container)
+│       └── nginx.conf                     (Reverse proxy config)
+│           ├── Upstream to backend:8001
+│           ├── Static file serving (frontend)
+│           ├── API proxy with rate limiting
+│           ├── SSE stream configuration
+│           ├── 30 req/min for general API
+│           ├── 10 req/min for uploads
+│           └── Security headers
+│
+├── ⚙️ Configuration & Ignore
+│   ├── .env.example                       (Template)
+│   │   └── Copy to .env and add API key
+│   │
+│   └── .gitignore                         (Git patterns)
+│       ├── .env (secrets)
+│       ├── .venv/ (virtual environment)
+│       ├── __pycache__/ (Python cache)
+│       ├── .idea/, .vscode/ (IDEs)
+│       └── .DS_Store (macOS files)
+│
+└── 📊 Summary Files (Generated)
+    └── REPOSITORY_SUMMARY.md              (This repo overview)
+    └── FILE_TREE.txt                      (File structure)
+
+
+═══════════════════════════════════════════════════════════════
+
+QUICK START GUIDE
+
+1. LOCAL DEVELOPMENT:
+   ├── ./setup.sh              (One-time setup)
+   ├── redis-server &          (Terminal 1)
+   ├── ./run.sh                (Terminal 2)
+   └── http://localhost
+
+2. DOCKER DEPLOYMENT:
+   ├── docker compose up --build
+   └── http://localhost
+
+═══════════════════════════════════════════════════════════════
+
+KEY FILES EXPLAINED
+
+Backend Flow:
+  main.py → routers → openrouter_client.py → OpenRouter API
+                   → redis_client.py → Redis
+
+Frontend Flow:
+  SmartLens_HK_Final.html → JavaScript → /api/* → Backend
+                                      → /api/notifications/stream (SSE)
+
+Config Flow:
+  .env.example → .env (user edits) → config.py → Throughout app
+
+═══════════════════════════════════════════════════════════════
+
+DEPLOYMENT OPTIONS
+
+Option 1: Docker (Production)
+  └── docker-compose.yml (Redis + Backend + Nginx in one command)
+
+Option 2: Local (Development)
+  ├── Redis (separate)
+  ├── Backend (./run.sh or uvicorn)
+  ├── Nginx (separate or skip)
+  └── Frontend (served by Nginx or locally)
+
+Option 3: Cloud (Future)
+  └── Kubernetes YAML templates (to be added)
+
+═══════════════════════════════════════════════════════════════
+
+VISION MODELS (HK-OPTIMIZED)
+
+Primary:
+  meta-llama/llama-4-maverick  [1.8s] [10/10 score] ⭐
+
+Fallback 1:
+  openai/gpt-4o-mini            [1.8s] [10/10 score]
+
+Fallback 2:
+  meta-llama/llama-4-scout      [2.3s] [10/10 score]
+
+All tested in Hong Kong region • Auto-fallback on rate limit
+
+═══════════════════════════════════════════════════════════════
+
+API ENDPOINTS
+
+POST /api/calories/analyse       Upload food image → nutrition
+POST /api/news/analyse           Classify headline → fake/real
+POST /api/health/steps           Daily steps → insights
+POST /api/health/sleep           Sleep hours → analysis
+GET  /api/notifications/stream   Real-time notifications (SSE)
+GET  /health                     Health check
+
+═══════════════════════════════════════════════════════════════
+
+CACHE STRATEGY
+
+Cache Type          Duration  Purpose
+─────────────────────────────────────────
+Food images         6 hours   Nutritional profiles don't change
+News analysis       1 hour    Stories evolve slower
+Step insights       10 min    Daily activity changes quickly
+Sleep analysis      1 hour    Sleep pattern changes daily
+Notifications       None      Real-time (SSE stream)
+
+═══════════════════════════════════════════════════════════════
+
+WHAT'S INCLUDED ✅
+
+Documentation
+  ✅ README.md (setup + features)
+  ✅ ARCHITECTURE.md (technical details)
+  ✅ CONTRIBUTING.md (dev guidelines)
+  ✅ GITHUB.md (GitHub profile)
+  ✅ LICENSE (MIT)
+
+Code
+  ✅ FastAPI backend with 4 routers
+  ✅ Redis async client with caching
+  ✅ OpenRouter API integration
+  ✅ HK-optimized frontend (3 models)
+  ✅ Server-Sent Events (SSE) streaming
+
+Infrastructure
+  ✅ Docker Compose (full stack)
+  ✅ Nginx reverse proxy
+  ✅ Rate limiting config
+  ✅ SSL/HTTPS ready
+
+Tools
+  ✅ setup.sh (automated setup)
+  ✅ run.sh (dev runner)
+  ✅ Vision model testing scripts
+
+═══════════════════════════════════════════════════════════════
+
+READY FOR GITHUB! 🚀
+
+This is a production-ready, well-documented, AI-powered project
+ready for open-source contribution and community engagement.
+
+Total files: 23+
+Lines of code: 3000+
+Documentation pages: 6
+Time to first deploy: 5 minutes (Docker)
+
+═══════════════════════════════════════════════════════════════

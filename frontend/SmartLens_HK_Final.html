@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SmartLens — AI Wellness Dashboard</title>
+<style>
+/* ═══════════════════════════════════════════════════
+   RESET & VARIABLES
+═══════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg      :#08091a;
+  --surface :#0f1022;
+  --card    :rgba(255,255,255,.04);
+  --border  :rgba(255,255,255,.08);
+  --text    :#e8eaf6;
+  --muted   :rgba(255,255,255,.45);
+  --purple  :#7c6fef;
+  --teal    :#2dd4bf;
+  --amber   :#fbbf24;
+  --red     :#f87171;
+  --green   :#34d399;
+  --pink    :#f472b6;
+  --r       :18px;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);
+  font-family:'Segoe UI',system-ui,-apple-system,sans-serif;overflow-x:hidden}
+
+/* ═══════════════════════════════════════════════════
+   SCROLLBAR
+═══════════════════════════════════════════════════ */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px}
+
+/* ═══════════════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════════════ */
+header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 36px;
+  background:rgba(255,255,255,.02);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(12px);
+  position:sticky;top:0;z-index:100;
+}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{
+  width:38px;height:38px;border-radius:10px;
+  background:linear-gradient(135deg,var(--purple),var(--teal));
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+}
+.logo-name{
+  font-size:20px;font-weight:800;letter-spacing:-.3px;
+  background:linear-gradient(135deg,var(--purple),var(--teal));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hdr-right{display:flex;align-items:center;gap:12px}
+.lens-pill{
+  display:flex;align-items:center;gap:7px;
+  padding:6px 14px;border-radius:999px;
+  background:rgba(124,111,239,.1);border:1px solid rgba(124,111,239,.25);
+  font-size:12px;color:var(--purple);font-weight:600;
+}
+.lens-dot{
+  width:7px;height:7px;border-radius:50%;background:var(--purple);
+  animation:blink 2s ease-in-out infinite;
+}
+@keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.4)}}
+.user-pill{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 14px;border-radius:999px;
+  background:var(--card);border:1px solid var(--border);
+  font-size:13px;font-weight:600;
+}
+.avatar{
+  width:28px;height:28px;border-radius:50%;
+  background:linear-gradient(135deg,var(--purple),var(--teal));
+  display:flex;align-items:center;justify-content:center;font-size:13px;
+}
+
+/* ═══════════════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════════════ */
+.dashboard{
+  display:grid;
+  grid-template-columns:290px 1fr 300px;
+  gap:20px;
+  padding:22px 36px;
+  max-width:1380px;
+  margin:0 auto;
+  align-items:start;
+}
+
+/* ═══════════════════════════════════════════════════
+   CARD BASE
+═══════════════════════════════════════════════════ */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:18px;
+  transition:transform .25s,box-shadow .25s;
+}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(124,111,239,.1)}
+.card+.card{margin-top:16px}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.card-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+.card-icon{
+  width:34px;height:34px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;font-size:17px;
+}
+
+/* ═══════════════════════════════════════════════════
+   LEFT — STEPS
+═══════════════════════════════════════════════════ */
+.ring-wrap{display:flex;align-items:center;gap:18px;margin:4px 0 14px}
+.ring-svg{width:84px;height:84px;flex-shrink:0}
+.ring-bg{fill:none;stroke:rgba(255,255,255,.07);stroke-width:7}
+.ring-prog{
+  fill:none;stroke:url(#ringGrad);stroke-width:7;stroke-linecap:round;
+  stroke-dasharray:226;stroke-dashoffset:40;
+  transition:stroke-dashoffset 1s ease;transform:rotate(-90deg);transform-origin:50% 50%;
+}
+.big-num{font-size:30px;font-weight:800;color:var(--purple)}
+.sub-lbl{font-size:11px;color:var(--muted);margin-top:2px}
+.goal-lbl{font-size:11px;color:var(--green);margin-top:6px;font-weight:600}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat-box{
+  background:rgba(255,255,255,.03);border:1px solid var(--border);
+  border-radius:10px;padding:9px 10px;text-align:center;
+}
+.stat-val{font-size:15px;font-weight:700;color:var(--purple)}
+.stat-lbl{font-size:10px;color:var(--muted);margin-top:2px}
+
+/* Weekly bar */
+.week-bars{display:flex;gap:5px;align-items:flex-end;height:44px;margin:10px 0 4px}
+.wbar{
+  flex:1;border-radius:4px 4px 0 0;
+  background:rgba(124,111,239,.25);transition:height .6s ease;min-height:4px;
+}
+.wbar.today{background:var(--purple)}
+.week-days{display:flex;gap:5px}
+.wd{flex:1;text-align:center;font-size:9px;color:var(--muted)}
+
+/* ═══════════════════════════════════════════════════
+   LEFT — SLEEP
+═══════════════════════════════════════════════════ */
+.sleep-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.sleep-dur{font-size:24px;font-weight:800;color:var(--teal)}
+.sleep-range{font-size:10px;color:var(--muted);margin-top:3px}
+.sleep-score-badge{
+  background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.2);
+  border-radius:10px;padding:6px 12px;text-align:center;
+}
+.sleep-score-num{font-size:20px;font-weight:800;color:var(--teal)}
+.sleep-score-lbl{font-size:9px;color:var(--muted)}
+.stages-bar{display:flex;height:10px;border-radius:6px;overflow:hidden;margin:8px 0}
+.s-deep{flex:2;background:var(--teal)}
+.s-light{flex:3;background:var(--purple)}
+.s-rem{flex:2;background:var(--amber)}
+.s-awake{flex:1;background:rgba(255,255,255,.15)}
+.stages-legend{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:8px}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)}
+.ldot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sleep-tip{
+  margin-top:12px;padding:9px 11px;font-size:11px;color:var(--muted);line-height:1.5;
+  background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:10px;
+}
+
+/* ═══════════════════════════════════════════════════
+   CENTER — PHONE
+═══════════════════════════════════════════════════ */
+.center-col{display:flex;flex-direction:column;align-items:center;gap:14px}
+.center-label{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.phone{
+  width:272px;height:572px;
+  background:#07080f;
+  border-radius:44px;
+  border:2.5px solid rgba(255,255,255,.12);
+  box-shadow:0 0 60px rgba(124,111,239,.2),inset 0 0 24px rgba(0,0,0,.4);
+  display:flex;flex-direction:column;overflow:hidden;position:relative;
+}
+.notch{
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:90px;height:26px;
+  background:#07080f;border-radius:0 0 18px 18px;
+  border-bottom:1px solid rgba(255,255,255,.07);z-index:5;
+}
+.p-status{
+  display:flex;justify-content:space-between;padding:14px 18px 4px;
+  font-size:10px;color:rgba(255,255,255,.6);margin-top:18px;flex-shrink:0;
+}
+.p-icons{display:flex;gap:5px;align-items:center;font-size:11px}
+.p-screen{flex:1;overflow-y:auto;padding:6px 10px 16px;scrollbar-width:none}
+.p-screen::-webkit-scrollbar{display:none}
+.p-clock{text-align:center;margin:8px 0 14px}
+.p-clock .p-date{font-size:11px;color:rgba(255,255,255,.4)}
+.p-clock .p-time{font-size:40px;font-weight:200;line-height:1;letter-spacing:-1px}
+.notif-group-label{
+  font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;
+  letter-spacing:.6px;margin:8px 0 5px 2px;
+}
+.notif{
+  display:flex;gap:9px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);
+  border-radius:14px;padding:10px;margin-bottom:7px;
+  animation:slideUp .4s ease;
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.notif.n-fake{border-left:3px solid var(--red)}
+.notif.n-cal{border-left:3px solid var(--amber)}
+.notif.n-step{border-left:3px solid var(--purple)}
+.notif.n-sleep{border-left:3px solid var(--teal)}
+.n-icon{
+  width:34px;height:34px;border-radius:9px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:17px;
+}
+.n-fake .n-icon{background:rgba(248,113,113,.15)}
+.n-cal .n-icon{background:rgba(251,191,36,.15)}
+.n-step .n-icon{background:rgba(124,111,239,.15)}
+.n-sleep .n-icon{background:rgba(45,212,191,.15)}
+.n-body{flex:1;min-width:0}
+.n-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
+.n-app{font-size:9px;font-weight:700;color:var(--muted)}
+.n-time{font-size:9px;color:rgba(255,255,255,.25)}
+.n-title{font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px}
+.n-desc{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.n-tag{
+  display:inline-block;margin-top:4px;padding:2px 7px;border-radius:6px;
+  font-size:9px;font-weight:700;
+}
+.tag-red{background:rgba(248,113,113,.15);color:var(--red)}
+.tag-amber{background:rgba(251,191,36,.15);color:var(--amber)}
+.tag-purple{background:rgba(124,111,239,.15);color:var(--purple)}
+.tag-green{background:rgba(52,211,153,.15);color:var(--green)}
+.tag-warn{background:rgba(251,191,36,.15);color:var(--amber)}
+
+/* Phone bottom stats */
+.p-stats{display:flex;gap:10px;margin-top:4px}
+.p-stat{
+  flex:1;text-align:center;padding:9px 4px;
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+}
+.p-stat-val{font-size:16px;font-weight:800}
+.p-stat-lbl{font-size:9px;color:var(--muted);margin-top:1px}
+
+/* ═══════════════════════════════════════════════════
+   RIGHT — FAKE NEWS
+═══════════════════════════════════════════════════ */
+.news-item{
+  border-radius:12px;padding:11px;margin-top:10px;
+  border:1px solid rgba(255,255,255,.07);
+  background:rgba(255,255,255,.02);
+}
+.news-item.fake{border-color:rgba(248,113,113,.2);background:rgba(248,113,113,.04)}
+.news-item.real{border-color:rgba(52,211,153,.2);background:rgba(52,211,153,.04)}
+.news-item.unsure{border-color:rgba(251,191,36,.2);background:rgba(251,191,36,.04)}
+.news-hl{font-size:11px;font-weight:600;line-height:1.45;color:var(--text);margin-bottom:7px}
+.conf-row{display:flex;align-items:center;gap:6px}
+.conf-lbl{font-size:9px;color:var(--muted);flex-shrink:0;width:30px}
+.conf-bar{flex:1;height:5px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden}
+.conf-fill{height:100%;border-radius:3px;transition:width 1s ease}
+.fill-red{background:linear-gradient(90deg,var(--red),#fca5a5)}
+.fill-green{background:linear-gradient(90deg,var(--green),#6ee7b7)}
+.fill-amber{background:linear-gradient(90deg,var(--amber),#fde68a)}
+.conf-pct{font-size:10px;font-weight:700;flex-shrink:0;width:28px;text-align:right}
+.news-src{font-size:9px;color:rgba(255,255,255,.25);margin-top:5px}
+.news-footer{
+  display:flex;justify-content:space-between;
+  margin-top:12px;font-size:10px;color:var(--muted);
+}
+
+/* ═══════════════════════════════════════════════════
+   RIGHT — CALORIE SCANNER
+═══════════════════════════════════════════════════ */
+.drop-zone{
+  position:relative;width:100%;height:130px;
+  border:2px dashed rgba(255,255,255,.12);border-radius:13px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .25s;overflow:hidden;background:rgba(255,255,255,.02);
+}
+.drop-zone:hover{border-color:rgba(251,191,36,.45);background:rgba(251,191,36,.03)}
+.drop-zone img{
+  display:none;position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;border-radius:11px;opacity:.85;
+}
+.dz-content{display:flex;flex-direction:column;align-items:center;gap:5px;z-index:1;pointer-events:none}
+.dz-icon{font-size:30px}
+.dz-text{font-size:11px;color:var(--muted)}
+input[type=file]{display:none}
+
+/* Scan overlay */
+.scan-overlay{
+  display:none;position:absolute;inset:0;border-radius:11px;
+  background:rgba(8,9,26,.8);
+  flex-direction:column;align-items:center;justify-content:center;gap:8px;z-index:10;
+}
+.scan-overlay.active{display:flex}
+.scan-line{
+  position:absolute;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--amber),transparent);
+  animation:scanAnim 1.4s ease-in-out infinite;
+}
+@keyframes scanAnim{0%{top:0;opacity:1}100%{top:100%;opacity:0}}
+.scan-spinner{
+  width:28px;height:28px;border-radius:50%;
+  border:3px solid rgba(251,191,36,.15);border-top-color:var(--amber);
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.scan-msg{font-size:11px;color:var(--amber);font-weight:600}
+
+/* Buttons */
+.btn-row{display:flex;gap:8px;margin-top:9px}
+.btn-analyse{
+  flex:1;padding:10px;border:none;border-radius:11px;cursor:pointer;font-weight:700;
+  font-size:13px;color:#fff;
+  background:linear-gradient(135deg,var(--amber),#f97316);transition:opacity .2s;
+}
+.btn-analyse:hover{opacity:.85}
+.btn-analyse:disabled{opacity:.5;cursor:not-allowed}
+.btn-clear{
+  padding:10px 14px;border:1px solid var(--border);border-radius:11px;
+  background:transparent;color:var(--muted);cursor:pointer;font-size:12px;transition:all .2s;
+}
+.btn-clear:hover{border-color:var(--red);color:var(--red)}
+
+/* Error box */
+.cal-error{
+  display:none;margin-top:10px;padding:10px 12px;
+  background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.2);
+  border-radius:10px;font-size:11px;color:var(--red);line-height:1.5;
+}
+.cal-error.show{display:block;animation:fadeUp .3s ease}
+
+/* Result card */
+.cal-result{
+  display:none;margin-top:10px;padding:13px;
+  background:rgba(251,191,36,.04);border:1px solid rgba(251,191,36,.15);
+  border-radius:13px;
+}
+.cal-result.show{display:block;animation:fadeUp .35s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.meal-name{font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px}
+.macro-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.macro{
+  background:rgba(255,255,255,.04);border:1px solid var(--border);
+  border-radius:9px;padding:8px 4px;text-align:center;
+}
+.macro strong{display:block;font-size:14px;font-weight:800}
+.macro small{font-size:9px;color:var(--muted);margin-top:2px;display:block}
+.macro-extras{
+  display:grid;grid-template-columns:1fr 1fr;gap:6px;
+  margin-top:8px;padding-top:8px;border-top:1px solid var(--border);
+}
+.ingredients-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.ing-chip{
+  background:rgba(255,255,255,.05);border:1px solid var(--border);
+  border-radius:999px;padding:3px 9px;font-size:10px;color:var(--muted);
+}
+.health-note{
+  display:none;margin-top:8px;padding:8px 10px;
+  background:rgba(52,211,153,.05);border:1px solid rgba(52,211,153,.15);
+  border-radius:9px;font-size:11px;color:var(--green);line-height:1.5;
+}
+.health-note.show{display:block}
+.result-footer{
+  margin-top:9px;padding:7px 9px;font-size:10px;color:var(--muted);
+  background:rgba(255,255,255,.03);border-radius:8px;
+}
+
+/* Daily tracker */
+.daily-track{margin-top:12px}
+.dt-row{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:5px}
+.bar-track{height:7px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden}
+.bar-fill{
+  height:100%;border-radius:4px;
+  background:linear-gradient(90deg,var(--green),var(--amber));
+  width:40%;transition:width .7s ease;
+}
+
+/* ═══════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════ */
+.toast{
+  position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:#1a1b2e;border:1px solid var(--border);border-radius:14px;
+  padding:12px 20px;display:flex;align-items:center;gap:10px;
+  box-shadow:0 8px 32px rgba(0,0,0,.4);z-index:9999;
+  transition:transform .4s cubic-bezier(.34,1.56,.64,1),opacity .4s;
+  opacity:0;white-space:nowrap;
+}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast-icon{font-size:22px}
+.toast-title{font-size:13px;font-weight:700;color:var(--text)}
+.toast-sub{font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HEADER ═══════════════ -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">🔮</div>
+    <span class="logo-name">SmartLens</span>
+  </div>
+  <div class="hdr-right">
+    <div class="lens-pill"><div class="lens-dot"></div>AI Lens Active</div>
+    <div class="user-pill"><div class="avatar">👤</div>Alex</div>
+  </div>
+</header>
+
+<!-- ═══════════════ DASHBOARD ═══════════════ -->
+<div class="dashboard">
+
+  <!-- ─── LEFT COLUMN ─── -->
+  <div class="left-col">
+
+    <!-- Step Count -->
+    <div class="card">
+      <div class="card-hdr">
+        <span class="card-title">Step Count</span>
+        <div class="card-icon" style="background:rgba(124,111,239,.15)">👟</div>
+      </div>
+      <div class="ring-wrap">
+        <svg class="ring-svg" viewBox="0 0 84 84">
+          <defs>
+            <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#7c6fef"/>
+              <stop offset="100%" stop-color="#2dd4bf"/>
+            </linearGradient>
+          </defs>
+          <circle class="ring-bg"   cx="42" cy="42" r="36"/>
+          <circle class="ring-prog" cx="42" cy="42" r="36"/>
+        </svg>
+        <div>
+          <div class="big-num" id="stepDisplay">8,246</div>
+          <div class="sub-lbl">of 10,000 steps</div>
+          <div class="goal-lbl" id="stepPct">🔥 82% to goal</div>
+        </div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-box"><div class="stat-val">5.2 km</div><div class="stat-lbl">Distance</div></div>
+        <div class="stat-box"><div class="stat-val">342</div><div class="stat-lbl">Cals Burned</div></div>
+        <div class="stat-box"><div class="stat-val">1h 12m</div><div class="stat-lbl">Active Time</div></div>
+        <div class="stat-box"><div class="stat-val">98 bpm</div><div class="stat-lbl">Avg HR</div></div>
+      </div>
+      <!-- weekly bars -->
+      <div style="margin-top:14px">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:6px">Daily progress</div>
+        <div class="week-bars" id="weekBars">
+          <div class="wbar" style="height:55%"></div>
+          <div class="wbar" style="height:72%"></div>
+          <div class="wbar" style="height:45%"></div>
+          <div class="wbar" style="height:88%"></div>
+          <div class="wbar" style="height:63%"></div>
+          <div class="wbar" style="height:78%"></div>
+          <div class="wbar today" style="height:82%"></div>
+        </div>
+        <div class="week-days">
+          <div class="wd">M</div><div class="wd">T</div><div class="wd">W</div>
+          <div class="wd">T</div><div class="wd">F</div><div class="wd">S</div>
+          <div class="wd" style="color:var(--purple);font-weight:700">S</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sleep Monitor -->
+    <div class="card" id="sleepCard">
+      <div class="card-hdr">
+        <span class="card-title">Sleep Monitor</span>
+        <div class="card-icon" style="background:rgba(45,212,191,.15)">🌙</div>
+      </div>
+      <div class="sleep-top">
+        <div>
+          <div class="sleep-dur">7h 23m</div>
+          <div class="sleep-range">11:32 PM – 6:55 AM</div>
+        </div>
+        <div class="sleep-score-badge">
+          <div class="sleep-score-num">87</div>
+          <div class="sleep-score-lbl">Score</div>
+        </div>
+      </div>
+      <div class="stages-bar">
+        <div class="s-deep"></div><div class="s-light"></div>
+        <div class="s-rem"></div><div class="s-awake"></div>
+      </div>
+      <div class="stages-legend">
+        <div class="legend-item"><div class="ldot" style="background:var(--teal)"></div>Deep · 1h 52m</div>
+        <div class="legend-item"><div class="ldot" style="background:var(--purple)"></div>Light · 2h 48m</div>
+        <div class="legend-item"><div class="ldot" style="background:var(--amber)"></div>REM · 1h 45m</div>
+        <div class="legend-item"><div class="ldot" style="background:rgba(255,255,255,.25)"></div>Awake · 58m</div>
+      </div>
+      <div class="sleep-tip">💡 Your REM sleep was 24% of total — slightly below the ideal 25%. Try sleeping 30 min earlier tonight.</div>
+    </div>
+
+  </div><!-- /left-col -->
+
+
+  <!-- ─── CENTER — PHONE ─── -->
+  <div class="center-col">
+    <div class="center-label">📱 Live Notifications</div>
+
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="p-status">
+        <span id="phoneClock">9:41</span>
+        <div class="p-icons"><span>📶</span><span>🔋</span></div>
+      </div>
+      <div class="p-screen">
+        <div class="p-clock">
+          <div class="p-date" id="phoneDate">Thursday, April 30</div>
+          <div class="p-time" id="phoneTime">09:41</div>
+        </div>
+
+        <div class="notif-group-label">New</div>
+        <div id="phoneNotifs">
+
+          <div class="notif n-fake">
+            <div class="n-icon">🔍</div>
+            <div class="n-body">
+              <div class="n-row"><span class="n-app">AI Lens · FakeGuard</span><span class="n-time">just now</span></div>
+              <div class="n-title">⚠️ Misinformation Detected</div>
+              <div class="n-desc">"New vaccine causes 5G activation"</div>
+              <span class="n-tag tag-red">94% Fake</span>
+            </div>
+          </div>
+
+          <div class="notif n-cal">
+            <div class="n-icon">🍽️</div>
+            <div class="n-body">
+              <div class="n-row"><span class="n-app">SmartLens · NutriAI</span><span class="n-time">12m ago</span></div>
+              <div class="n-title">Lunch Analysed 🥗</div>
+              <div class="n-desc">Chicken Caesar Salad · 487 kcal</div>
+              <span class="n-tag tag-amber">+487 kcal</span>
+            </div>
+          </div>
+
+          <div class="notif n-step">
+            <div class="n-icon">👟</div>
+            <div class="n-body">
+              <div class="n-row"><span class="n-app">SmartLens · FitTrack</span><span class="n-time">1h ago</span></div>
+              <div class="n-title">8,000 Steps Reached! 🎉</div>
+              <div class="n-desc">Only 2,000 more to hit your daily goal</div>
+              <span class="n-tag tag-purple">80% Complete</span>
+            </div>
+          </div>
+
+          <div class="notif n-sleep">
+            <div class="n-icon">🌙</div>
+            <div class="n-body">
+              <div class="n-row"><span class="n-app">SmartLens · SleepAI</span><span class="n-time">7h ago</span></div>
+              <div class="n-title">Sleep Report Ready 💤</div>
+              <div class="n-desc">7h 23m · Score 87/100 · Good</div>
+              <span class="n-tag tag-green">Excellent Rest</span>
+            </div>
+          </div>
+
+          <div class="notif-group-label">Earlier</div>
+
+          <div class="notif n-fake">
+            <div class="n-icon">🔍</div>
+            <div class="n-body">
+              <div class="n-row"><span class="n-app">AI Lens · FakeGuard</span><span class="n-time">3h ago</span></div>
+              <div class="n-title">✅ News Verified</div>
+              <div class="n-desc">"WHO confirms new flu strain"</div>
+              <span class="n-tag tag-green">97% Legit</span>
+            </div>
+          </div>
+
+        </div><!-- /phoneNotifs -->
+      </div><!-- /p-screen -->
+    </div><!-- /phone -->
+
+    <!-- Bottom stats -->
+    <div class="p-stats">
+      <div class="p-stat">
+        <div class="p-stat-val" style="color:var(--amber)" id="totKcal">799</div>
+        <div class="p-stat-lbl">kcal today</div>
+      </div>
+      <div class="p-stat">
+        <div class="p-stat-val" style="color:var(--purple)" id="totSteps">8,246</div>
+        <div class="p-stat-lbl">steps</div>
+      </div>
+      <div class="p-stat">
+        <div class="p-stat-val" style="color:var(--red)" id="fakeCount">1</div>
+        <div class="p-stat-lbl">fake detected</div>
+      </div>
+    </div>
+
+  </div><!-- /center-col -->
+
+
+  <!-- ─── RIGHT COLUMN ─── -->
+  <div class="right-col">
+
+    <!-- Fake News -->
+    <div class="card">
+      <div class="card-hdr">
+        <span class="card-title">Fake News Detection</span>
+        <div class="card-icon" style="background:rgba(248,113,113,.15)">🔍</div>
+      </div>
+      <div class="lens-pill" style="font-size:11px">
+        <div class="lens-dot"></div>AI Lens · Scanning live
+      </div>
+      <div id="newsFeed">
+        <div class="news-item fake">
+          <div class="news-hl">"New vaccine causes 5G activation in bloodstream"</div>
+          <div class="conf-row">
+            <span class="conf-lbl">Fake</span>
+            <div class="conf-bar"><div class="conf-fill fill-red" style="width:94%"></div></div>
+            <span class="conf-pct" style="color:var(--red)">94%</span>
+          </div>
+          <div class="news-src">socialmedia.io · 2m ago</div>
+        </div>
+        <div class="news-item real">
+          <div class="news-hl">"WHO confirms new seasonal flu strain"</div>
+          <div class="conf-row">
+            <span class="conf-lbl">Real</span>
+            <div class="conf-bar"><div class="conf-fill fill-green" style="width:97%"></div></div>
+            <span class="conf-pct" style="color:var(--green)">97%</span>
+          </div>
+          <div class="news-src">who.int · 3h ago</div>
+        </div>
+        <div class="news-item unsure">
+          <div class="news-hl">"Scientists find water traces in Mars atmosphere"</div>
+          <div class="conf-row">
+            <span class="conf-lbl">Unsure</span>
+            <div class="conf-bar"><div class="conf-fill fill-amber" style="width:61%"></div></div>
+            <span class="conf-pct" style="color:var(--amber)">61%</span>
+          </div>
+          <div class="news-src">newsblog.net · 1h ago</div>
+        </div>
+      </div>
+      <div class="news-footer">
+        <span>🔴 1 fake today</span><span>✅ 12 verified</span>
+      </div>
+    </div>
+
+    <!-- Calorie Scanner -->
+    <div class="card" id="calCard" style="margin-top:16px">
+      <div class="card-hdr">
+        <span class="card-title">Calorie Scanner</span>
+        <div class="card-icon" style="background:rgba(251,191,36,.15)">🍽️</div>
+      </div>
+
+      <!-- Drop zone -->
+      <div class="drop-zone" id="dropZone" onclick="document.getElementById('foodFile').click()">
+        <img id="foodPreview" alt="preview"/>
+        <div class="scan-overlay" id="scanOverlay">
+          <div class="scan-line"></div>
+          <div class="scan-spinner"></div>
+          <span class="scan-msg" id="scanMsg">Analysing…</span>
+        </div>
+        <div class="dz-content">
+          <div class="dz-icon" id="dzIcon">📷</div>
+          <div class="dz-text" id="dzText">Tap or drag food photo here</div>
+        </div>
+      </div>
+      <input type="file" id="foodFile" accept="image/*"/>
+
+      <div class="btn-row">
+        <button class="btn-analyse" id="analyseBtn">🔬 Analyse Meal</button>
+        <button class="btn-clear"   id="clearBtn">✕</button>
+      </div>
+
+      <!-- Error -->
+      <div class="cal-error" id="calError"></div>
+
+      <!-- Result -->
+      <div class="cal-result" id="calResult">
+        <div class="meal-name" id="mealName">🍛 Chicken Biryani</div>
+        <div class="macro-grid">
+          <div class="macro"><strong style="color:var(--amber)"  id="mKcal">0</strong><small>kcal</small></div>
+          <div class="macro"><strong style="color:var(--purple)" id="mCarb">0g</strong><small>carbs</small></div>
+          <div class="macro"><strong style="color:var(--teal)"   id="mProt">0g</strong><small>protein</small></div>
+          <div class="macro"><strong style="color:var(--red)"    id="mFat">0g</strong><small>fat</small></div>
+        </div>
+        <div class="macro-extras" id="macroExtras"></div>
+        <div class="ingredients-row" id="ingredientsRow"></div>
+        <div class="health-note"    id="healthNote"></div>
+        <div class="result-footer">✅ Result sent to phone notification</div>
+      </div>
+
+      <!-- Daily intake tracker -->
+      <div class="daily-track">
+        <div class="dt-row">
+          <span>Daily Intake</span>
+          <span id="dtLabel">799 / 2000 kcal</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" id="intakeBar" style="width:40%"></div>
+        </div>
+      </div>
+
+    </div><!-- /calCard -->
+
+  </div><!-- /right-col -->
+</div><!-- /dashboard -->
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span class="toast-icon" id="toastIcon"></span>
+  <div><div class="toast-title" id="toastTitle"></div><div class="toast-sub" id="toastSub"></div></div>
+</div>
+
+<script>
+// ════════════════ NOTIFICATIONS ════════════════
+const Notifications = (() => {
+  function push(icon, app, title, desc, tagCls, tagText, bg) {
+    const feed  = document.getElementById("phoneNotifs");
+    const first = feed.querySelector(".notif");
+    const div   = document.createElement("div");
+    const typeMap = {
+      "tag-red":"n-fake","tag-amber":"n-cal","tag-warn":"n-cal",
+      "tag-purple":"n-step","tag-green":"n-sleep"
+    };
+    div.className = "notif " + (typeMap[tagCls] || "n-cal");
+    if (bg) div.style.borderLeftColor = bg.replace("rgba","rgba").replace(".15",".5");
+    div.innerHTML = `
+      <div class="n-icon">${icon}</div>
+      <div class="n-body">
+        <div class="n-row">
+          <span class="n-app">${app}</span>
+          <span class="n-time">just now</span>
+        </div>
+        <div class="n-title">${title}</div>
+        <div class="n-desc">${desc}</div>
+        <span class="n-tag ${tagCls}">${tagText}</span>
+      </div>`;
+    feed.insertBefore(div, first);
+    document.querySelector(".p-screen").scrollTop = 0;
+  }
+
+  function showToast(icon, title, sub) {
+    const t = document.getElementById("toast");
+    document.getElementById("toastIcon").textContent  = icon;
+    document.getElementById("toastTitle").textContent = title;
+    document.getElementById("toastSub").textContent   = sub;
+    t.classList.add("show");
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove("show"), 4000);
+  }
+
+  return { push, showToast };
+})();
+
+// ════════════════ CLOCK ════════════════
+const Clock = (() => {
+  function update() {
+    const now  = new Date();
+    const h    = String(now.getHours()).padStart(2,"0");
+    const m    = String(now.getMinutes()).padStart(2,"0");
+    const time = h + ":" + m;
+    const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+    const mons = ["January","February","March","April","May","June",
+                  "July","August","September","October","November","December"];
+    const dateStr = days[now.getDay()] + ", " + mons[now.getMonth()] + " " + now.getDate();
+    const el = (id) => document.getElementById(id);
+    if (el("phoneClock")) el("phoneClock").textContent = time;
+    if (el("phoneTime"))  el("phoneTime").textContent  = time;
+    if (el("phoneDate"))  el("phoneDate").textContent  = dateStr;
+  }
+  update();
+  setInterval(update, 30000);
+  return {};
+})();
+
+// ════════════════ STEPS ════════════════
+const Steps = (() => {
+  let steps = 8246;
+  const GOAL = 10000;
+  const DASHARRAY = 226;
+
+  function updateRing() {
+    const pct    = Math.min(steps / GOAL, 1);
+    const offset = DASHARRAY - pct * DASHARRAY;
+    const prog   = document.querySelector(".ring-prog");
+    if (prog) prog.style.strokeDashoffset = offset;
+    const sd = document.getElementById("stepDisplay");
+    const sp = document.getElementById("stepPct");
+    const ts = document.getElementById("totSteps");
+    if (sd) sd.textContent = steps.toLocaleString();
+    if (sp) sp.textContent = "🔥 " + Math.round(pct * 100) + "% to goal";
+    if (ts) ts.textContent = steps.toLocaleString();
+  }
+
+  updateRing();
+
+  // Simulate step increments
+  setInterval(() => {
+    if (steps < GOAL) {
+      steps += Math.floor(Math.random() * 8 + 2);
+      updateRing();
+      if (steps >= GOAL) {
+        Notifications.push("👟","FitTrack","🎉 Goal Reached!",
+          "You hit 10,000 steps today!","tag-green","🏆 Done","rgba(52,211,153,.15)");
+        Notifications.showToast("👟","Goal Reached!","10,000 steps — amazing work!");
+      }
+    }
+  }, 4000);
+
+  return {};
+})();
+
+// ════════════════ FAKE NEWS ════════════════
+const FakeNews = (() => {
+  const headlines = [
+    { hl:'"AI chip implants control human thoughts remotely"',       src:"conspiracyblog.net", verdict:"fake",   pct:96 },
+    { hl:'"Study links 5G towers to sleep disruption"',              src:"viralhealth.io",     verdict:"unsure", pct:58 },
+    { hl:'"NASA confirms record solar flare on April 28"',           src:"nasa.gov",           verdict:"real",   pct:2  },
+    { hl:'"Government putting microchips in tap water"',             src:"unknownsource.net",  verdict:"fake",   pct:99 },
+    { hl:'"New study shows walking 8k steps reduces mortality 30%"', src:"nejm.org",           verdict:"real",   pct:4  },
+  ];
+  let idx = 0;
+  let fakeCount = 1;
+
+  setInterval(() => {
+    const item = headlines[idx % headlines.length];
+    idx++;
+    const feed = document.getElementById("newsFeed");
+    const div  = document.createElement("div");
+    div.className = "news-item " + item.verdict;
+    const fillCls = item.verdict === "fake" ? "fill-red"
+                  : item.verdict === "real" ? "fill-green" : "fill-amber";
+    const pctColor = item.verdict === "fake" ? "var(--red)"
+                   : item.verdict === "real" ? "var(--green)" : "var(--amber)";
+    const lbl = item.verdict === "fake" ? "Fake"
+              : item.verdict === "real" ? "Real" : "Unsure";
+    div.innerHTML = `
+      <div class="news-hl">${item.hl}</div>
+      <div class="conf-row">
+        <span class="conf-lbl">${lbl}</span>
+        <div class="conf-bar"><div class="conf-fill ${fillCls}" style="width:${item.pct}%"></div></div>
+        <span class="conf-pct" style="color:${pctColor}">${item.pct}%</span>
+      </div>
+      <div class="news-src">${item.src} · just now</div>`;
+    feed.insertBefore(div, feed.firstChild);
+    while (feed.children.length > 4) feed.removeChild(feed.lastChild);
+
+    if (item.verdict === "fake") {
+      fakeCount++;
+      const fc = document.getElementById("fakeCount");
+      if (fc) fc.textContent = fakeCount;
+      Notifications.push("🔍","AI Lens · FakeGuard","⚠️ Misinformation",
+        item.hl.slice(0,40),"tag-red",item.pct+"% Fake","rgba(248,113,113,.15)");
+    } else if (item.verdict === "real") {
+      Notifications.push("🔍","AI Lens · FakeGuard","✅ Verified",
+        item.hl.slice(0,40),"tag-green",item.pct+"% Legit","rgba(52,211,153,.15)");
+    }
+  }, 12000);
+
+  return {};
+})();
+
+// ════════════════ CALORIES ════════════════
+const Calories = (() => {
+  const DAILY_GOAL = 2000;
+  const ENDPOINT   = "https://openrouter.ai/api/v1/chat/completions";
+  const API_KEY    = "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";
+
+  // All 3 tested & confirmed working in HK region (scored 10/10)
+  const MODELS = [
+    "meta-llama/llama-4-maverick",   // 🏆 Primary  — 1.8s, 10/10, HK ✅
+    "openai/gpt-4o-mini",            // ✅ Fallback1 — 1.8s, 10/10, HK ✅
+    "meta-llama/llama-4-scout",      // ✅ Fallback2 — 2.3s, 10/10, HK ✅
+  ];
+
+  let totalKcal = 799;
+  let scanning  = false;
+  const $  = (id) => document.getElementById(id);
+
+  // ── File select → preview ──────────────────────────────────────
+  $("foodFile").addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const rd = new FileReader();
+    rd.onload = (ev) => {
+      $("foodPreview").src           = ev.target.result;
+      $("foodPreview").style.display = "block";
+      $("dzIcon").textContent        = "✅";
+      $("dzText").textContent        = file.name.length > 30
+                                         ? file.name.slice(0,27) + "…"
+                                         : file.name;
+    };
+    rd.readAsDataURL(file);
+  });
+
+  // ── Drag & drop ────────────────────────────────────────────────
+  const dz = $("dropZone");
+  dz.addEventListener("dragover",  (e) => { e.preventDefault(); dz.style.borderColor="rgba(251,191,36,.6)"; });
+  dz.addEventListener("dragleave", ()  => { dz.style.borderColor = ""; });
+  dz.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dz.style.borderColor = "";
+    const file = e.dataTransfer.files[0];
+    if (!file || !file.type.startsWith("image/")) return;
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    $("foodFile").files = dt.files;
+    $("foodFile").dispatchEvent(new Event("change"));
+  });
+
+  // ── File → base64 data-URL ─────────────────────────────────────
+  function readFile(file) {
+    return new Promise((res, rej) => {
+      const rd = new FileReader();
+      rd.onload  = (e) => res(e.target.result);
+      rd.onerror = ()  => rej(new Error("Cannot read image file"));
+      rd.readAsDataURL(file);
+    });
+  }
+
+  // ── Single model call ──────────────────────────────────────────
+  async function callModel(dataURL, model) {
+    // Small delay between model attempts to avoid burst rate-limits
+    await new Promise(r => setTimeout(r, 300));
+    const prompt = `You are a nutritionist AI. Analyse this food image carefully.
+Return ONLY a JSON object — no markdown, no explanation, just raw JSON:
+{
+  "meal_name": "1 emoji + dish name",
+  "kcal": <integer>,
+  "carbs_g": <integer>,
+  "protein_g": <integer>,
+  "fat_g": <integer>,
+  "fiber_g": <integer>,
+  "sugar_g": <integer>,
+  "ingredients": ["item1","item2","item3","item4","item5"],
+  "health_note": "one sentence on nutritional quality",
+  "portion_note": "estimated serving size e.g. 1 cup / 300g"
+}`;
+
+    const resp = await fetch(ENDPOINT, {
+      method  : "POST",
+      headers : {
+        "Authorization" : `Bearer ${API_KEY}`,
+        "Content-Type"  : "application/json",
+        "HTTP-Referer"  : "https://smartlens.app",
+        "X-Title"       : "SmartLens",
+      },
+      body: JSON.stringify({
+        model,
+        messages: [{
+          role: "user",
+          content: [
+            { type: "image_url", image_url: { url: dataURL } },
+            { type: "text",      text: prompt },
+          ]
+        }],
+        temperature : 0.1,
+        max_tokens  : 2048,
+      })
+    });
+
+    const data = await resp.json();
+
+    if (!resp.ok) {
+      const msg = data?.error?.message || `HTTP ${resp.status}`;
+      throw new Error(msg);
+    }
+    if (!data?.choices?.[0]?.message?.content?.trim()) {
+      throw new Error("Model returned empty response");
+    }
+
+    const raw = (data?.choices?.[0]?.message?.content || "").trim();
+    if (!raw) throw new Error("Empty response from " + model);
+
+    // Robust extraction: strip fences, find outermost { }
+    const clean = raw.replace(/```json/gi,"").replace(/```/g,"").trim();
+    const start = clean.indexOf("{");
+    const end   = clean.lastIndexOf("}") + 1;
+    if (start < 0 || end <= 1) throw new Error("No JSON found in response");
+
+    return JSON.parse(clean.slice(start, end));
+  }
+
+  // ── Try model cascade ──────────────────────────────────────────
+  async function analyseImage(dataURL) {
+    let lastErr = new Error("No models available");
+    for (const model of MODELS) {
+      try {
+        const modelLabel = {
+          "meta-llama/llama-4-maverick" : "Llama 4 Maverick",
+          "openai/gpt-4o-mini"          : "GPT-4o Mini",
+          "meta-llama/llama-4-scout"    : "Llama 4 Scout",
+        }[model] || model;
+        $("scanMsg").textContent = `Asking ${modelLabel}…`;
+        const result = await callModel(dataURL, model);
+        console.log("[SmartLens] Calories success with", model);
+        return result;
+      } catch (err) {
+        console.warn("[SmartLens] Model failed:", model, "→", err.message);
+        lastErr = err;
+      }
+    }
+    throw lastErr;
+  }
+
+  // ── Render result into UI ──────────────────────────────────────
+  function renderResult(meal) {
+    $("mealName").textContent = meal.meal_name  || "Unknown Meal";
+    $("mKcal").textContent    = meal.kcal        || 0;
+    $("mCarb").textContent    = (meal.carbs_g    || 0) + "g";
+    $("mProt").textContent    = (meal.protein_g  || 0) + "g";
+    $("mFat").textContent     = (meal.fat_g      || 0) + "g";
+
+    const ex = $("macroExtras");
+    if (ex) ex.innerHTML =
+      `<div class="macro"><strong style="color:var(--green)">${meal.fiber_g ?? "—"}g</strong><small>fiber</small></div>
+       <div class="macro"><strong style="color:var(--pink)">${meal.sugar_g ?? "—"}g</strong><small>sugar</small></div>`;
+
+    const row = $("ingredientsRow");
+    if (row) {
+      row.innerHTML = "";
+      (meal.ingredients || []).forEach(ing => {
+        const c = document.createElement("span");
+        c.className   = "ing-chip";
+        c.textContent = ing;
+        row.appendChild(c);
+      });
+      if (meal.portion_note) {
+        const c = document.createElement("span");
+        c.className = "ing-chip";
+        c.style.cssText = "background:rgba(99,102,241,.1);border-color:rgba(99,102,241,.3);color:#a78bfa";
+        c.textContent = "📏 " + meal.portion_note;
+        row.appendChild(c);
+      }
+    }
+
+    const hn = $("healthNote");
+    if (hn) {
+      hn.textContent = "💚 " + (meal.health_note || "");
+      hn.classList.toggle("show", !!meal.health_note);
+    }
+
+    $("calError").classList.remove("show");
+    $("calResult").classList.add("show");
+  }
+
+  // ── Daily bar ──────────────────────────────────────────────────
+  function updateBar(kcal) {
+    totalKcal += kcal;
+    const pct = Math.min((totalKcal / DAILY_GOAL) * 100, 100);
+    if ($("dtLabel"))   $("dtLabel").textContent   = totalKcal.toLocaleString() + " / " + DAILY_GOAL + " kcal";
+    if ($("intakeBar")) $("intakeBar").style.width = pct + "%";
+    if ($("totKcal"))   $("totKcal").textContent   = totalKcal.toLocaleString();
+  }
+
+  // ── Error display ──────────────────────────────────────────────
+  function showError(msg) {
+    const el = $("calError");
+    if (el) { el.textContent = "❌ " + msg; el.classList.add("show"); }
+    $("calResult").classList.remove("show");
+  }
+
+  // ══ ANALYSE BUTTON ════════════════════════════════════════════
+  $("analyseBtn").addEventListener("click", async () => {
+    if (scanning) return;
+
+    const file = $("foodFile").files[0];
+    if (!file) {
+      showError("Please upload or drag a food photo first.");
+      return;
+    }
+
+    scanning = true;
+    $("calResult").classList.remove("show");
+    $("calError").classList.remove("show");
+    $("analyseBtn").disabled = true;
+
+    const msgs = [
+      "Reading image…","Sending to AI…","Detecting food…",
+      "Estimating portions…","Calculating macros…","Almost done…"
+    ];
+    let si = 0;
+    $("scanMsg").textContent = msgs[0];
+    $("scanOverlay").classList.add("active");
+    const ticker = setInterval(() => {
+      si = (si + 1) % msgs.length;
+      $("scanMsg").textContent = msgs[si];
+    }, 1200);
+
+    try {
+      const dataURL = await readFile(file);
+      const meal    = await analyseImage(dataURL);
+
+      clearInterval(ticker);
+      $("scanOverlay").classList.remove("active");
+
+      renderResult(meal);
+      updateBar(meal.kcal || 0);
+
+      Notifications.push(
+        "🍽️", "NutriAI",
+        meal.meal_name + " analysed",
+        meal.kcal + " kcal · P:" + meal.protein_g +
+          "g C:" + meal.carbs_g + "g F:" + meal.fat_g + "g",
+        "tag-warn", "+" + meal.kcal + " kcal", "rgba(251,191,36,.15)"
+      );
+      Notifications.showToast("🍽️","Meal Analysed!", meal.meal_name + " — " + meal.kcal + " kcal");
+
+    } catch (err) {
+      clearInterval(ticker);
+      $("scanOverlay").classList.remove("active");
+      // Friendly message for rate-limit (429) vs real errors
+      const is429 = err.message && (
+        err.message.includes("429") ||
+        err.message.toLowerCase().includes("rate limit") ||
+        err.message.toLowerCase().includes("per-day")
+      );
+      if (is429) {
+        showError(
+          "All models rate-limited. Please wait 1 minute and try again."
+        );
+      } else {
+        showError(err.message || "Analysis failed — check browser console.");
+      }
+      console.error("[SmartLens Calories]", err);
+    } finally {
+      scanning = false;
+      $("analyseBtn").disabled = false;
+    }
+  });
+
+  // ══ CLEAR BUTTON ══════════════════════════════════════════════
+  $("clearBtn").addEventListener("click", () => {
+    $("foodPreview").src           = "";
+    $("foodPreview").style.display = "none";
+    $("calResult").classList.remove("show");
+    $("calError").classList.remove("show");
+    $("dzIcon").textContent        = "📷";
+    $("dzText").textContent        = "Tap or drag food photo here";
+    $("foodFile").value            = "";
+    const row = $("ingredientsRow");
+    if (row) row.innerHTML = "";
+    const hn = $("healthNote");
+    if (hn)  hn.classList.remove("show");
+  });
+
+  return { init: () => {} };
+})();
+
+// ════════════════ APP INIT ════════════════
+document.addEventListener("DOMContentLoaded", () => {
+  Clock;
+  Steps;
+  FakeNews;
+  Calories.init();
+  console.log("[SmartLens] Dashboard ready ✅");
+});
+</script>
+</body>
+</html>
