@@ -3,29 +3,55 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>SmartLens — Health Checks</title>
+<title>SmartLens — Watch Health Checks</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#08091a;--surface:#0f1022;--card:rgba(255,255,255,.04);
-  --border:rgba(255,255,255,.08);--text:#e8eaf6;--muted:rgba(255,255,255,.45);
-  --purple:#7c6fef;--teal:#2dd4bf;--r:18px;
+  --bg:#08091a;--surface:#0f1022;--card:rgba(255,255,255,.05);
+  --border:rgba(255,255,255,.1);--text:#e8eaf6;--muted:rgba(255,255,255,.55);
+  --purple:#7c6fef;--teal:#2dd4bf;--amber:#fbbf24;--red:#f87171;--green:#34d399;--r:18px;
 }
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,-apple-system,sans-serif}
-
-header{display:flex;align-items:center;justify-content:space-between;padding:14px 36px;background:rgba(255,255,255,.02);border-bottom:1px solid var(--border);backdrop-filter:blur(12px)}
+html,body{min-height:100%;background:radial-gradient(circle at top left,rgba(124,111,254,.2),transparent 35%),var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,-apple-system,sans-serif}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 36px;background:rgba(255,255,255,.03);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);position:sticky;top:0;z-index:10}
 .logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit}
 .logo-icon{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--purple),var(--teal));display:flex;align-items:center;justify-content:center;font-size:20px}
 .logo-name{font-size:20px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .back-link{color:var(--muted);text-decoration:none;font-size:14px}
 .back-link:hover{color:var(--text)}
-
-main{max-width:800px;margin:0 auto;padding:80px 24px;text-align:center}
-.empty-icon{font-size:64px;margin-bottom:20px}
-h1{font-size:28px;font-weight:700;margin-bottom:12px;color:var(--teal)}
-p{color:var(--muted);font-size:16px}
-
-footer{text-align:center;padding:30px;border-top:1px solid var(--border);color:var(--muted);font-size:12px;margin-top:60px}
+main{max-width:1100px;margin:0 auto;padding:56px 24px}
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:24px;align-items:stretch;margin-bottom:24px}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:24px;box-shadow:0 18px 60px rgba(0,0,0,.22)}
+.eyebrow{color:var(--teal);font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px}
+h1{font-size:38px;line-height:1.05;margin-bottom:14px;letter-spacing:-.04em}
+p{color:var(--muted);line-height:1.65}
+.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+button{border:0;border-radius:12px;padding:13px 16px;font-weight:800;cursor:pointer;transition:.2s transform,.2s opacity}
+button:hover{transform:translateY(-2px)}
+button:disabled{cursor:not-allowed;opacity:.55;transform:none}
+.primary{background:linear-gradient(135deg,var(--teal),#60a5fa);color:#021014}
+.secondary{background:rgba(255,255,255,.08);color:var(--text);border:1px solid var(--border)}
+.status{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:14px;margin-top:16px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--amber);box-shadow:0 0 20px currentColor}
+.connected .dot{background:var(--green)}
+.error .dot{background:var(--red)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.metric{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:16px;padding:20px}
+.metric h2{font-size:15px;color:var(--muted);font-weight:700;margin-bottom:8px}
+.big{font-size:42px;font-weight:900;letter-spacing:-.04em}
+.unit{font-size:15px;color:var(--muted);font-weight:600;margin-left:4px}
+.bar{height:10px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin:15px 0 10px}
+.fill{height:100%;width:0;background:linear-gradient(90deg,var(--purple),var(--teal));transition:.4s width}
+.sub{display:flex;justify-content:space-between;color:var(--muted);font-size:13px}
+.insights{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:18px}
+.insight-card h3,.import-card h3{font-size:18px;margin-bottom:10px}
+.badge{display:inline-flex;align-items:center;border-radius:99px;padding:6px 10px;background:rgba(45,212,191,.12);color:var(--teal);font-size:12px;font-weight:800;margin-bottom:10px}
+.risk{border-left:3px solid var(--amber);padding:10px 12px;background:rgba(251,191,36,.08);border-radius:10px;margin-top:10px;color:#fde68a}
+.risk.warning{border-left-color:var(--red);background:rgba(248,113,113,.08);color:#fecaca}
+textarea{width:100%;min-height:190px;margin:14px 0 12px;padding:14px;border-radius:12px;background:#090a16;color:var(--text);border:1px solid var(--border);font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:13px;resize:vertical}
+.import-card{margin-top:18px}
+.empty{color:var(--muted);font-style:italic}
+footer{text-align:center;padding:28px;border-top:1px solid var(--border);color:var(--muted);font-size:12px;margin-top:50px}
+@media(max-width:800px){.hero,.grid,.insights{grid-template-columns:1fr}h1{font-size:30px}header{padding:14px 20px}.big{font-size:34px}}
 </style>
 </head>
 <body>
@@ -39,14 +65,237 @@ footer{text-align:center;padding:30px;border-top:1px solid var(--border);color:v
 </header>
 
 <main>
-  <div class="empty-icon">❤️</div>
-  <h1>Health Checks</h1>
-  <p>This feature is coming soon. Please check back later.</p>
+  <section class="hero">
+    <div class="panel">
+      <div class="eyebrow">Watch Health Reader</div>
+      <h1>Read sleep and step data from your watch.</h1>
+      <p>Connect a demo smartwatch or import normalized wearable JSON. SmartLens reads daily step count, active minutes, sleep duration, deep sleep, REM sleep and sleep score, then asks the AI coach for calm, actionable insights.</p>
+      <div class="actions">
+        <button class="primary" id="syncBtn">Sync Demo Watch</button>
+        <button class="secondary" id="loadSampleBtn">Load Sample JSON</button>
+      </div>
+      <div class="status" id="status">
+        <span class="dot"></span>
+        <span id="statusText">No watch data loaded yet.</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="eyebrow">Data Source</div>
+      <p id="sourceText">Waiting for a watch reading...</p>
+      <div id="riskList" style="margin-top:16px">
+        <p class="empty">SmartLens only interrupts when the watch data suggests a meaningful health risk.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="metric">
+      <h2>Step Count</h2>
+      <div><span class="big" id="stepsValue">--</span><span class="unit">steps</span></div>
+      <div class="bar"><div class="fill" id="stepsFill"></div></div>
+      <div class="sub"><span id="stepsGoal">Goal: --</span><span id="activeMinutes">Active: --</span></div>
+    </div>
+
+    <div class="metric">
+      <h2>Sleep Data</h2>
+      <div><span class="big" id="sleepValue">--</span><span class="unit">hours</span></div>
+      <div class="bar"><div class="fill" id="sleepFill"></div></div>
+      <div class="sub"><span id="sleepStages">Deep: -- · REM: --</span><span id="sleepScore">Score: --</span></div>
+    </div>
+  </section>
+
+  <section class="insights">
+    <div class="panel insight-card">
+      <span class="badge">Steps Insight</span>
+      <h3 id="stepsInsightTitle">Ready for analysis</h3>
+      <p id="stepsInsight">Sync or import watch data to generate a step-count insight.</p>
+    </div>
+    <div class="panel insight-card">
+      <span class="badge">Sleep Insight</span>
+      <h3 id="sleepInsightTitle">Ready for analysis</h3>
+      <p id="sleepInsight">Sync or import watch data to generate a sleep quality insight.</p>
+    </div>
+  </section>
+
+  <section class="panel import-card">
+    <div class="eyebrow">Real Watch Adapter</div>
+    <h3>Import wearable JSON</h3>
+    <p>Use this shape for Apple Health, Fitbit, Garmin or Health Connect exports after your real connector normalizes the data.</p>
+    <textarea id="watchJson" spellcheck="false"></textarea>
+    <button class="primary" id="importBtn">Import Watch Data</button>
+  </section>
 </main>
 
 <footer>
-  SmartLens AI Wellness Dashboard · Powered by OpenRouter
+  SmartLens AI Wellness Dashboard · Health data is shown locally for this demo.
 </footer>
 
+<script>
+const sampleReading = {
+  source: "Leon Apple Watch Export",
+  captured_at: new Date().toISOString(),
+  day: new Date().toISOString().slice(0, 10),
+  mode: "imported",
+  steps: {
+    steps: 8420,
+    goal: 10000,
+    active_minutes: 48,
+    distance_km: 6.1
+  },
+  sleep: {
+    duration_hours: 7.2,
+    deep_hours: 1.4,
+    rem_hours: 1.7,
+    score: 82
+  }
+};
+
+const els = {
+  status: document.getElementById("status"),
+  statusText: document.getElementById("statusText"),
+  sourceText: document.getElementById("sourceText"),
+  riskList: document.getElementById("riskList"),
+  stepsValue: document.getElementById("stepsValue"),
+  stepsFill: document.getElementById("stepsFill"),
+  stepsGoal: document.getElementById("stepsGoal"),
+  activeMinutes: document.getElementById("activeMinutes"),
+  sleepValue: document.getElementById("sleepValue"),
+  sleepFill: document.getElementById("sleepFill"),
+  sleepStages: document.getElementById("sleepStages"),
+  sleepScore: document.getElementById("sleepScore"),
+  stepsInsightTitle: document.getElementById("stepsInsightTitle"),
+  stepsInsight: document.getElementById("stepsInsight"),
+  sleepInsightTitle: document.getElementById("sleepInsightTitle"),
+  sleepInsight: document.getElementById("sleepInsight"),
+  watchJson: document.getElementById("watchJson"),
+  syncBtn: document.getElementById("syncBtn"),
+  loadSampleBtn: document.getElementById("loadSampleBtn"),
+  importBtn: document.getElementById("importBtn")
+};
+
+function setStatus(text, type = "") {
+  els.status.className = `status ${type}`;
+  els.statusText.textContent = text;
+}
+
+function pct(value, max) {
+  return Math.max(0, Math.min(100, Math.round((value / max) * 100)));
+}
+
+function renderReading(reading) {
+  els.sourceText.textContent = `${reading.source} · ${reading.day} · ${reading.mode} mode`;
+
+  els.stepsValue.textContent = Number(reading.steps.steps).toLocaleString();
+  els.stepsFill.style.width = `${pct(reading.steps.steps, reading.steps.goal)}%`;
+  els.stepsGoal.textContent = `Goal: ${Number(reading.steps.goal).toLocaleString()}`;
+  els.activeMinutes.textContent = `Active: ${reading.steps.active_minutes} min · ${reading.steps.distance_km || 0} km`;
+
+  els.sleepValue.textContent = Number(reading.sleep.duration_hours).toFixed(1);
+  els.sleepFill.style.width = `${pct(reading.sleep.duration_hours, 8)}%`;
+  els.sleepStages.textContent = `Deep: ${reading.sleep.deep_hours}h · REM: ${reading.sleep.rem_hours}h`;
+  els.sleepScore.textContent = `Score: ${reading.sleep.score || "--"}`;
+
+  if (reading.risk_flags && reading.risk_flags.length) {
+    els.riskList.innerHTML = reading.risk_flags.map(flag =>
+      `<div class="risk ${flag.level === "warning" ? "warning" : ""}">${flag.message}</div>`
+    ).join("");
+  } else {
+    els.riskList.innerHTML = '<p class="empty">No urgent health risk detected from this watch reading.</p>';
+  }
+}
+
+async function api(path, options = {}) {
+  const response = await fetch(`/api${path}`, {
+    headers: {"Content-Type": "application/json", ...(options.headers || {})},
+    ...options
+  });
+  if (!response.ok) throw new Error(await response.text());
+  return response.json();
+}
+
+async function loadInsights(reading) {
+  els.stepsInsightTitle.textContent = "Analyzing steps...";
+  els.stepsInsight.textContent = "Asking the AI coach for a short step-count recommendation.";
+  els.sleepInsightTitle.textContent = "Analyzing sleep...";
+  els.sleepInsight.textContent = "Asking the AI sleep coach for a calm recovery recommendation.";
+
+  const stepsPayload = {
+    steps: reading.steps.steps,
+    goal: reading.steps.goal,
+    active_minutes: reading.steps.active_minutes
+  };
+  const sleepPayload = {
+    duration_hours: reading.sleep.duration_hours,
+    deep_hours: reading.sleep.deep_hours,
+    rem_hours: reading.sleep.rem_hours,
+    score: reading.sleep.score
+  };
+
+  const [stepsResult, sleepResult] = await Promise.allSettled([
+    api("/health/steps", {method: "POST", body: JSON.stringify(stepsPayload)}),
+    api("/health/sleep", {method: "POST", body: JSON.stringify(sleepPayload)})
+  ]);
+
+  if (stepsResult.status === "fulfilled") {
+    els.stepsInsightTitle.textContent = stepsResult.value.badge || "Steps summary";
+    els.stepsInsight.textContent = `${stepsResult.value.insight || ""} ${stepsResult.value.tip || ""}`.trim();
+  } else {
+    els.stepsInsightTitle.textContent = "Steps summary";
+    els.stepsInsight.textContent = "Watch steps were read successfully, but AI analysis is unavailable. Check the OpenRouter key and backend logs.";
+  }
+
+  if (sleepResult.status === "fulfilled") {
+    els.sleepInsightTitle.textContent = `${sleepResult.value.quality || "Sleep"} quality`;
+    els.sleepInsight.textContent = `${sleepResult.value.insight || ""} ${sleepResult.value.tip || ""}`.trim();
+  } else {
+    els.sleepInsightTitle.textContent = "Sleep summary";
+    els.sleepInsight.textContent = "Watch sleep data was read successfully, but AI analysis is unavailable. Check the OpenRouter key and backend logs.";
+  }
+}
+
+async function handleReading(reading, statusMessage) {
+  renderReading(reading);
+  setStatus(statusMessage, "connected");
+  await loadInsights(reading);
+}
+
+els.syncBtn.addEventListener("click", async () => {
+  try {
+    els.syncBtn.disabled = true;
+    setStatus("Syncing latest demo watch reading...");
+    const reading = await api("/health/watch/latest");
+    await handleReading(reading, "Demo watch data synced.");
+  } catch (error) {
+    setStatus("Could not sync watch data. Is the backend running?", "error");
+  } finally {
+    els.syncBtn.disabled = false;
+  }
+});
+
+els.loadSampleBtn.addEventListener("click", () => {
+  els.watchJson.value = JSON.stringify(sampleReading, null, 2);
+  setStatus("Sample JSON loaded. Click Import Watch Data to read it.");
+});
+
+els.importBtn.addEventListener("click", async () => {
+  try {
+    els.importBtn.disabled = true;
+    setStatus("Importing wearable JSON...");
+    const payload = JSON.parse(els.watchJson.value);
+    const reading = await api("/health/watch/import", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+    await handleReading(reading, "Imported watch data successfully.");
+  } catch (error) {
+    setStatus("Import failed. Check the JSON shape and backend connection.", "error");
+  } finally {
+    els.importBtn.disabled = false;
+  }
+});
+
+els.watchJson.value = JSON.stringify(sampleReading, null, 2);
+</script>
 </body>
 </html>

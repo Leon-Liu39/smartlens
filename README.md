@@ -111,6 +111,8 @@ Browser  ──── HTTP ────►  Nginx :80
 | `POST` | `/api/news/analyse` | Classify headline as fake/real |
 | `POST` | `/api/health/steps` | AI step count insight |
 | `POST` | `/api/health/sleep` | AI sleep quality report |
+| `GET`  | `/api/health/watch/latest` | Read latest smartwatch demo data |
+| `POST` | `/api/health/watch/import` | Import normalized smartwatch steps + sleep data |
 | `GET`  | `/api/notifications/stream` | SSE real-time push stream |
 | `GET`  | `/health` | Health check |
 
@@ -145,6 +147,8 @@ curl -X POST http://localhost/api/calories/analyse \
 | `smartlens:news:<md5>` | 1 hour |
 | `smartlens:steps:<n>:<goal>` | 10 minutes |
 | `smartlens:sleep:<h>:<score>` | 1 hour |
+| `smartlens:watch:latest:<date>` | 10 minutes |
+| `smartlens:watch:last_import` | 1 hour |
 
 ---
 
@@ -173,7 +177,7 @@ smartlens_bundle/
 └── frontend/
     ├── index.html               ← New landing page with three feature buttons (NEW)
     ├── fake-news.html           ← Enhanced fake news detector with OCR & voice (NEW)
-    ├── health-checks.html       ← Health checks placeholder page (NEW)
+    ├── health-checks.html       ← Watch steps + sleep data reader (NEW)
     ├── SmartLens_HK_Final.html  ← HK-optimized UI with Llama 4 / GPT-4o / Qwen
     ├── script.py                ← Model testing script for HK region
     ├── script_1.py              ← Full nutrition test on working models
@@ -247,13 +251,43 @@ Clean, minimalist interface with three main entry points:
 - **❤️ Health Checks** → Placeholder for future health monitoring features
 - **🍽️ Food Calories** → Original calorie analysis dashboard
 
-### 3. Updated Frontend Structure
+### 3. Watch Health Checks (`/health-checks.html`)
+
+The Health Checks page now reads wearable data for Leon's feature area:
+- **Sync Demo Watch**: loads a local smartwatch reading with steps, active minutes, sleep stages, and sleep score.
+- **Import Wearable JSON**: accepts normalized Apple Health / Fitbit / Garmin / Health Connect style data.
+- **AI Coaching**: sends the watch step and sleep readings to `/api/health/steps` and `/api/health/sleep` for concise recommendations.
+- **Quiet Alerts**: shows risk flags only when the reading suggests low sleep or unusually low movement.
+
+Expected import shape:
+```json
+{
+  "source": "Leon Apple Watch Export",
+  "captured_at": "2026-05-01T13:00:00Z",
+  "day": "2026-05-01",
+  "mode": "imported",
+  "steps": {
+    "steps": 8420,
+    "goal": 10000,
+    "active_minutes": 48,
+    "distance_km": 6.1
+  },
+  "sleep": {
+    "duration_hours": 7.2,
+    "deep_hours": 1.4,
+    "rem_hours": 1.7,
+    "score": 82
+  }
+}
+```
+
+### 4. Updated Frontend Structure
 
 ```
 frontend/
 ├── index.html              ← New landing page with three buttons
 ├── fake-news.html          ← Enhanced fake news detector (NEW)
-├── health-checks.html      ← Health checks placeholder (NEW)
+├── health-checks.html      ← Watch health reader for steps + sleep (NEW)
 ├── SmartLens_HK_Final.html ← Original full dashboard
 └── ...
 ```
