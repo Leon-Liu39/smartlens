@@ -5,7 +5,7 @@ name: Deploy portfolio to GitHub Pages
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, master, health-watch-data]
   workflow_dispatch:
 
 permissions:
