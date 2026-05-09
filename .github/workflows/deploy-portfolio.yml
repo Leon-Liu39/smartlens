@@ -1,0 +1,27 @@
+# Publishes the /portfolio site to the gh-pages branch. In the repo on GitHub:
+# Settings → Pages → Build and deployment → Source: Deploy from branch → gh-pages / / (root)
+
+name: Deploy portfolio to GitHub Pages
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./portfolio
+          force_orphan: true
